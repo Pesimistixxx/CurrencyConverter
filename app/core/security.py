@@ -49,5 +49,5 @@ def get_user_from_token(token: Annotated[str, Depends(oauth2_scheme)]):
 
 
 def create_jwt_token(username: str):
-    expire = datetime.datetime.now() + datetime.timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    expire = datetime.datetime.utcnow() + datetime.timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     return jwt.encode(payload={'sub': username, 'exp': expire}, key=SECRET_KEY, algorithm=ALGORITHM)

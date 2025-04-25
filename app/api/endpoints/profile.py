@@ -19,7 +19,7 @@ async def get_user_profile(db: Annotated[AsyncSession, Depends(get_db)], user: s
     return {
         'username': user,
         'last posts': posts.all(),
-        'message': 'success'
+        'message': 'Welcome to your profile!!!'
     }
 
 
