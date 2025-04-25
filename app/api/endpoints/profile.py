@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends, status
 from typing import Annotated
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, insert, desc
-import httpx
 
 from app.core.security import get_user_from_token
 from app.api.schemas.post import CreatePost
@@ -49,10 +48,3 @@ async def create_user_post(db: Annotated[AsyncSession, Depends(get_db)],
     return {
         'posts': posts.all()
     }
-
-
-@profile_router.get('/exchanger')
-async def exchange_values(user: str = Depends(get_user_from_token)):
-    async with httpx.AsyncClient() as client:
-        response = await client.get('https://api.apilayer.com/currency_data/convert')
-        return response.json()
