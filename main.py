@@ -7,6 +7,7 @@ from app.api.endpoints.exchanger import exchanger_router
 
 app = FastAPI()
 
+
 app.include_router(user_router)
 app.include_router(profile_router)
 app.include_router(exchanger_router)
