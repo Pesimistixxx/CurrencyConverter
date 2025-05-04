@@ -45,10 +45,6 @@ def get_user_from_cookie(request: Request):
         return payload.get("sub")
     except jwt.ExpiredSignatureError:
         return RedirectResponse('/auth/login')
-        # raise HTTPException(
-        #     status_code=status.HTTP_401_UNAUTHORIZED,
-        #     detail="Token expired"
-        # )
     except jwt.exceptions.InvalidTokenError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

@@ -55,18 +55,14 @@
     </style>
 </head>
 <body>
-    <!-- Навигационное меню (как в профиле) -->
      <nav class="custom-navbar">
     <div class="nav-content">
         <div class="d-flex justify-content-between align-items-center">
-            <!-- Левая часть -->
             <div class="d-flex align-items-center">
                 <a href="/exchanger" class="nav-link">Exchanger</a>
                 <a href="/profile/post/create" class="nav-link">Создать пост</a>
                 <a href="/profile/posts" class="nav-link">Все посты</a>
             </div>
-
-            <!-- Правая часть -->
             <div class="d-flex align-items-center">
                 <a href="/profile" class="btn profile-btn">
                     {{ username }}
@@ -86,8 +82,6 @@
             <div class="col-12 col-md-10 col-lg-8">
                 <div class="posts-container">
                     <h2 class="page-title">Все посты</h2>
-
-                    <!-- Цикл вывода постов -->
                     {% for post in posts %}
                     <div class="post-card">
                         <div class="d-flex justify-content-between align-items-start mb-3">
@@ -106,7 +100,6 @@
             </div>
         </div>
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

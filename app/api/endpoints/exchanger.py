@@ -2,10 +2,8 @@ import httpx
 from fastapi import APIRouter, Depends, Request, Form
 from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
-import json
 
 from app.api.schemas.exchange import CreateExchange
-from app.core.config import settings
 from app.core.security import get_user_from_cookie
 
 exchanger_router = APIRouter(prefix='/exchanger', tags=['exchanger'])
