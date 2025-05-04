@@ -14,6 +14,7 @@ class User_model(Base):
     email: Mapped[str] = mapped_column(unique=True, nullable=False)
     password: Mapped[str] = mapped_column(nullable=False)
     is_admin: Mapped[bool] = mapped_column(default=False)
+    is_active: Mapped[bool] = mapped_column(default=True)
 
 class Post_moodel(Base):
     __tablename__ = 'posts'

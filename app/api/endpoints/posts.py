@@ -115,6 +115,7 @@ async def put_post(db: Annotated[AsyncSession, Depends(get_db)],
 
     user_obj = await db.scalar(select(User_model)
                                .where(User_model.username == user))
+
     if post.username != user and not user_obj.is_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

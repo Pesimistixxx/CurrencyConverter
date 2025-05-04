@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status, Request, Response, Path
+from fastapi import APIRouter, Depends, status, Request, Response, Path, HTTPException
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, RedirectResponse
 from typing import Annotated
@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc
 
 from app.core.security import get_user_from_cookie
-from app.api.database.db_models import Post_moodel
+from app.api.database.db_models import Post_moodel, User_model
 from app.api.database.db_depends import get_db
 
 profile_router = APIRouter(prefix='/profile', tags=['profile'])
@@ -49,3 +49,40 @@ async def logout_user(response: Response):
         secure=True
     )
     return RedirectResponse(url="/auth/login", status_code=303)
+
+
+@profile_router.delete('/{username}')
+async def delete_user_profile(response: Response,
+                              db: Annotated[AsyncSession, Depends(get_db)],
+                              username: str = Path(min_length=4, max_length=20),
+                              user: str = Depends(get_user_from_cookie)):
+    user_obj = await db.scalar(select(User_model)
+                               .where(User_model.username == user))
+    if user_obj.username != username and not user_obj.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You aren't allowed to delete this user"
+        )
+    executable_user = await db.scalar(select(User_model)
+                                      .where(User_model.username == username))
+
+    if not executable_user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='user is already deleted'
+        )
+
+    executable_user.is_active = False
+    user_obj_name = user_obj.username
+    await db.commit()
+
+    if user_obj_name == username:
+        response.delete_cookie(
+            key='auth_token',
+            path='/',
+            samesite='lax',
+            httponly=True,
+            secure=True
+        )
+        return RedirectResponse(url="/auth/login", status_code=303)
+    return RedirectResponse(url='/profile', status_code=303)
