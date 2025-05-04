@@ -44,8 +44,6 @@ async def get_user_profile_another(username: str,
     return templates.TemplateResponse("profile.html", {'request': request, 'username': username, 'posts': posts.all()})
 
 
-
-
 @profile_router.post('/post/create', status_code=status.HTTP_201_CREATED)
 async def create_user_post(db: Annotated[AsyncSession, Depends(get_db)],
                            post_inp: CreatePost = Depends(get_profile_data_post),
@@ -65,7 +63,7 @@ async def create_user_get(request: Request,
     return templates.TemplateResponse("post_create.html", {'request': request, 'username': user})
 
 
-@profile_router.get('/posts')
+@profile_router.get('/post/list')
 async def create_user_post(request: Request,
                            db: Annotated[AsyncSession, Depends(get_db)],
                            user: str = Depends(get_user_from_cookie)):
