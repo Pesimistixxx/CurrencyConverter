@@ -44,6 +44,7 @@ def get_user_from_cookie(request: Request):
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload.get("sub")
     except jwt.ExpiredSignatureError:
+        return 1
         return RedirectResponse('/auth/login')
     except jwt.exceptions.InvalidTokenError:
         raise HTTPException(

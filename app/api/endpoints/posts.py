@@ -45,6 +45,7 @@ async def create_user_get(request: Request,
 async def create_user_post(request: Request,
                            db: Annotated[AsyncSession, Depends(get_db)],
                            user: str = Depends(get_user_from_cookie)):
+
     posts = await db.scalars(select(Post_moodel)
                              .where(Post_moodel.username == user, Post_moodel.is_active == True)
                              .order_by(desc('id')))
@@ -57,13 +58,16 @@ async def get_post(request: Request,
                    db: Annotated[AsyncSession, Depends(get_db)],
                    user: str = Depends(get_user_from_cookie),
                    post_id: int = Path(ge=1)):
+
     post = await db.scalar(select(Post_moodel)
                      .where(Post_moodel.id == post_id))
+
     if post.username != user and post.is_active == False:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="you aren't allowed to this post"
         )
+
     return post
 
 
@@ -71,6 +75,7 @@ async def get_post(request: Request,
 async def delete_post(db: Annotated[AsyncSession, Depends(get_db)],
                       user: str = Depends(get_user_from_cookie),
                       post_id: int = Path(ge=1)):
+
     post = await db.scalar(select(Post_moodel)
                            .where(Post_moodel.id == post_id))
     if post.username != user:
@@ -78,6 +83,8 @@ async def delete_post(db: Annotated[AsyncSession, Depends(get_db)],
             status_code=status.HTTP_403_FORBIDDEN,
             detail="you aren't allowed to delete this post"
         )
+
     post.is_active = False
     await db.commit()
+
     return RedirectResponse('/profile', status_code=303)

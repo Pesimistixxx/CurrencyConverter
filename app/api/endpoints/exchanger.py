@@ -42,20 +42,30 @@ async def get_exchanger_data(
 @exchanger_router.post('')
 async def exchange_test(exchange_inp: CreateExchange = Depends(get_exchanger_data),
                         user: str = Depends(get_user_from_cookie)):
+
     url = 'https://www.cbr-xml-daily.ru/daily_json.js'
     async with httpx.AsyncClient() as client:
         response = await client.get(
             url
         )
+
     if exchange_inp.to_val == 'RUB':
         well_to = 1
+        nominal_to = 1
+
     else:
         well_to = response.json()['Valute'][exchange_inp.to_val]['Value']
+        nominal_to = response.json()['Valute'][exchange_inp.to_val]['Nominal']
+
     if exchange_inp.from_val == 'RUB':
         well_from = 1
+        nominal_from = 1
+
     else:
         well_from = response.json()['Valute'][exchange_inp.from_val]['Value']
-    to_val = well_from / well_to * exchange_inp.amount
+        nominal_from = response.json()['Valute'][exchange_inp.from_val]['Nominal']
+
+    to_val = (well_from / nominal_from) / (well_to / nominal_to) * exchange_inp.amount
     json_dict = {'amount_to': to_val}
     return JSONResponse(
         content=json_dict,
