@@ -8,7 +8,7 @@ from sqlalchemy import select, insert, desc
 from app.api.database.db_depends import get_db
 from app.api.schemas.post import CreatePost
 from app.core.security import get_user_from_cookie
-from app.api.database.db_models import Post_moodel
+from app.api.database.db_models import Post_moodel, User_model
 
 posts_router = APIRouter(prefix='/post', tags=['profile'])
 templates = Jinja2Templates(directory="templates")
@@ -42,7 +42,7 @@ async def create_user_get(request: Request,
 
 
 @posts_router.get('/list')
-async def create_user_post(request: Request,
+async def get_posts_list(request: Request,
                            db: Annotated[AsyncSession, Depends(get_db)],
                            user: str = Depends(get_user_from_cookie)):
 
@@ -77,8 +77,16 @@ async def delete_post(db: Annotated[AsyncSession, Depends(get_db)],
                       post_id: int = Path(ge=1)):
 
     post = await db.scalar(select(Post_moodel)
-                           .where(Post_moodel.id == post_id))
-    if post.username != user:
+                           .where(Post_moodel.id == post_id,
+                                  Post_moodel.is_active == True))
+    if not post:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Post not found'
+        )
+    user_obj = await db.scalar(select(User_model)
+                               .where(User_model.username==user))
+    if post.username != user and not user_obj.is_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="you aren't allowed to delete this post"
@@ -88,3 +96,36 @@ async def delete_post(db: Annotated[AsyncSession, Depends(get_db)],
     await db.commit()
 
     return RedirectResponse('/profile', status_code=303)
+
+
+@posts_router.put('/{post_id}')
+async def put_post(db: Annotated[AsyncSession, Depends(get_db)],
+                   user: str = Depends(get_user_from_cookie),
+                   post_inp: CreatePost = Depends(get_profile_data_post),
+                   post_id: int = Path(ge=1)
+                   ):
+    post = await db.scalar(select(Post_moodel)
+                           .where(Post_moodel.id == post_id,
+                                  Post_moodel.is_active == True))
+    if not post:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Post not found'
+        )
+
+    user_obj = await db.scalar(select(User_model)
+                               .where(User_model.username == user))
+    if post.username != user and not user_obj.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="you aren't allowed to delete this post"
+        )
+
+    post.text = post_inp.text
+
+    await db.commit()
+
+    return {
+        'status_code': status.HTTP_200_OK,
+        'transaction': 'successful'
+    }
